@@ -6,7 +6,8 @@ using System.Threading.Tasks;
 
 namespace Assignment_OOP.Interfaces
 {
-    internal interface Interface1
+    internal class IAccount<V>
     {
+       public void MenuAccount();
     }
 }

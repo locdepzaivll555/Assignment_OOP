@@ -6,8 +6,11 @@ using System.Threading.Tasks;
 
 namespace Assignment_OOP.Implements
 {
-    internal class SuperClass
+    internal class SAccount <Model>
     {
+        public static int Login();
+        public static int Register();
+        public static int CheckCorrectAccount();
 
     }
 }
