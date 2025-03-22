@@ -1,0 +1,191 @@
+using System;
+using System.IO;
+
+class Program
+{
+    static void Main()
+    {
+        int soHang = 8;
+        int soCot = 6;
+        bool[,] ghe = new bool[soHang, soCot];
+        string filePath = "trangthai_ghe.txt";
+
+        // Doc trang thai ghe tu file neu co
+        if (File.Exists(filePath))
+        {
+            DocTrangThai(ghe, filePath, soHang, soCot);
+        }
+
+        while (true)
+        {
+            Console.Clear();
+            Console.WriteLine("===== QUAN LY GHE RAP PHIM =====");
+            Console.WriteLine("1. Xem so do ghe");
+            Console.WriteLine("2. Dat ghe");
+            Console.WriteLine("3. Huy ghe");
+            Console.WriteLine("4. Luu va Thoat");
+            Console.WriteLine("================================");
+            Console.Write("Chon chuc nang (1-4): ");
+            string luaChon = Console.ReadLine();
+
+            switch (luaChon)
+            {
+                case "1":
+                    Console.Clear();
+                    HienThiGhe(ghe, soHang, soCot);
+                    Console.WriteLine("\nNhan Enter de quay lai menu...");
+                    Console.ReadLine();
+                    break;
+
+                case "2":
+                    Console.Clear();
+                    HienThiGhe(ghe, soHang, soCot);
+                    Console.Write("\nNhap vi tri ghe muon DAT (VD: A1): ");
+                    string dat = Console.ReadLine().ToUpper();
+
+                    if (KiemTraNhapGhe(dat, soHang, soCot, out int hangDat, out int cotDat))
+                    {
+                        if (!ghe[hangDat, cotDat])
+                        {
+                            ghe[hangDat, cotDat] = true;
+                            Console.WriteLine($"Da dat ghe {dat} thanh cong!");
+                        }
+                        else
+                        {
+                            Console.WriteLine($"Ghe {dat} da duoc dat roi!");
+                        }
+                    }
+                    else
+                    {
+                        Console.WriteLine("Vi tri ghe khong hop le!");
+                    }
+                    Console.WriteLine("\nNhan Enter de quay lai menu...");
+                    Console.ReadLine();
+                    break;
+
+                case "3":
+                    Console.Clear();
+                    HienThiGhe(ghe, soHang, soCot);
+                    Console.Write("\nNhap vi tri ghe muon HUY (VD: A1): ");
+                    string huy = Console.ReadLine().ToUpper();
+
+                    if (KiemTraNhapGhe(huy, soHang, soCot, out int hangHuy, out int cotHuy))
+                    {
+                        if (ghe[hangHuy, cotHuy])
+                        {
+                            ghe[hangHuy, cotHuy] = false;
+                            Console.WriteLine($"Da huy ghe {huy}!");
+                        }
+                        else
+                        {
+                            Console.WriteLine($"Ghe {huy} dang trong!");
+                        }
+                    }
+                    else
+                    {
+                        Console.WriteLine("Vi tri ghe khong hop le!");
+                    }
+                    Console.WriteLine("\nNhan Enter de quay lai menu...");
+                    Console.ReadLine();
+                    break;
+
+                case "4":
+                    LuuTrangThai(ghe, filePath, soHang, soCot);
+                    Console.WriteLine("Da luu trang thai ghe. Thoat chuong trinh...");
+                    return;
+
+                default:
+                    Console.WriteLine("Lua chon khong hop le! Nhan Enter de thu lai...");
+                    Console.ReadLine();
+                    break;
+            }
+        }
+    }
+
+    static void HienThiGhe(bool[,] ghe, int soHang, int soCot)
+    {
+        Console.WriteLine("So do ghe ([A1]: trong, [ X ]: da dat):\n");
+
+        // In so cot
+        Console.Write("     ");
+        for (int j = 0; j < soCot; j++)
+        {
+            Console.Write($" {j + 1:D2}  "); // Thêm khoảng trắng
+        }
+        Console.WriteLine("\n");
+
+        for (int i = 0; i < soHang; i++)
+        {
+            char tenHang = (char)('A' + i);
+            Console.Write($" {tenHang}   ");
+
+            for (int j = 0; j < soCot; j++)
+            {
+                if (ghe[i, j]) // ghe da dat
+                {
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.Write("[ X ] ");
+                }
+                else // ghe trong
+                {
+                    Console.ForegroundColor = ConsoleColor.Gray;
+                    Console.Write($"[{tenHang}{j + 1:D2}] ");
+                }
+            }
+            Console.WriteLine("\n");
+        }
+
+        Console.ResetColor();
+    }
+
+
+    static bool KiemTraNhapGhe(string nhap, int soHang, int soCot, out int hang, out int cot)
+    {
+        hang = -1;
+        cot = -1;
+
+        if (nhap.Length < 2 || nhap.Length > 3)
+            return false;
+
+        char kyTuHang = nhap[0];
+        if (kyTuHang < 'A' || kyTuHang >= 'A' + soHang)
+            return false;
+
+        if (!int.TryParse(nhap.Substring(1), out cot))
+            return false;
+
+        if (cot < 1 || cot > soCot)
+            return false;
+
+        hang = kyTuHang - 'A';
+        cot = cot - 1;
+        return true;
+    }
+
+    static void LuuTrangThai(bool[,] ghe, string filePath, int soHang, int soCot)
+    {
+        using (StreamWriter writer = new StreamWriter(filePath))
+        {
+            for (int i = 0; i < soHang; i++)
+            {
+                for (int j = 0; j < soCot; j++)
+                {
+                    writer.Write(ghe[i, j] ? "1" : "0");
+                }
+                writer.WriteLine();
+            }
+        }
+    }
+
+    static void DocTrangThai(bool[,] ghe, string filePath, int soHang, int soCot)
+    {
+        string[] lines = File.ReadAllLines(filePath);
+        for (int i = 0; i < Math.Min(soHang, lines.Length); i++)
+        {
+            for (int j = 0; j < Math.Min(soCot, lines[i].Length); j++)
+            {
+                ghe[i, j] = lines[i][j] == '1';
+            }
+        }
+    }
+}
