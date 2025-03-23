@@ -26,7 +26,7 @@ class Program
             Console.Clear();
             Console.WriteLine("===== QUAN LY VE PHIM =====");
             Console.WriteLine("1. Xem so do ghe");
-            Console.WriteLine("2. Tao ve phim moi ");
+            Console.WriteLine("2. Tao ve phim moi (dat ghe ngay)");
             Console.WriteLine("3. Xem danh sach ve phim");
             Console.WriteLine("4. Dat ghe vao ve phim");
             Console.WriteLine("5. Huy ghe trong ve phim");
@@ -106,17 +106,19 @@ class Program
 
         Console.Clear();
         HienThiGhe();
-        Console.Write("\nNhap so luong ghe muon dat: ");
-        if (!int.TryParse(Console.ReadLine(), out int soLuong) || soLuong <= 0)
+        int soLuong;
+        while (true)
         {
-            Console.WriteLine("So luong khong hop le!");
-            Console.ReadLine();
-            return;
+            Console.Write("\nNhap so luong ghe muon dat: ");
+            if (int.TryParse(Console.ReadLine(), out soLuong) && soLuong > 0)
+                break;
+            Console.WriteLine("So luong khong hop le! Moi nhap lai.");
         }
 
-        for (int i = 0; i < soLuong; i++)
+        int daDat = 0;
+        while (daDat < soLuong)
         {
-            Console.Write($"Nhap ma ghe thu {i + 1} (VD: A1): ");
+            Console.Write($"Nhap ma ghe thu {daDat + 1} (VD: A1): ");
             string nhap = Console.ReadLine().ToUpper();
             if (KiemTraNhapGhe(nhap, out int hang, out int cot))
             {
@@ -125,15 +127,16 @@ class Program
                     ghe[hang, cot] = true;
                     ve.GheDaDat.Add((hang, cot));
                     Console.WriteLine($"Da dat ghe {nhap} vao ve {ve.ID}.");
+                    daDat++;
                 }
                 else
                 {
-                    Console.WriteLine($"Ghe {nhap} da duoc dat. Bo qua.");
+                    Console.WriteLine($"Ghe {nhap} da duoc dat. Moi nhap lai.");
                 }
             }
             else
             {
-                Console.WriteLine("Dinh dang ghe khong hop le. Bo qua.");
+                Console.WriteLine("Dinh dang ghe khong hop le. Moi nhap lai.");
             }
         }
 
@@ -186,40 +189,41 @@ class Program
         }
 
         HienThiGhe();
-        Console.Write("\nNhap ma ve phim: ");
-        if (!int.TryParse(Console.ReadLine(), out int maVe))
+        VePhim ve;
+        while (true)
         {
-            Console.WriteLine("Ma ve khong hop le!");
-            Console.ReadLine();
-            return;
-        }
-
-        var ve = danhSachVe.Find(v => v.ID == maVe);
-        if (ve == null)
-        {
-            Console.WriteLine("Khong tim thay ve phim!");
-            Console.ReadLine();
-            return;
-        }
-
-        Console.Write("Nhap ma ghe muon dat (VD: A1): ");
-        string nhap = Console.ReadLine().ToUpper();
-        if (KiemTraNhapGhe(nhap, out int hang, out int cot))
-        {
-            if (!ghe[hang, cot])
+            Console.Write("\nNhap ma ve phim: ");
+            if (int.TryParse(Console.ReadLine(), out int maVe))
             {
-                ghe[hang, cot] = true;
-                ve.GheDaDat.Add((hang, cot));
-                Console.WriteLine($"Da dat ghe {nhap} vao ve {maVe}!");
+                ve = danhSachVe.Find(v => v.ID == maVe);
+                if (ve != null)
+                    break;
+            }
+            Console.WriteLine("Ma ve khong hop le! Moi nhap lai.");
+        }
+
+        while (true)
+        {
+            Console.Write("Nhap ma ghe muon dat (VD: A1): ");
+            string nhap = Console.ReadLine().ToUpper();
+            if (KiemTraNhapGhe(nhap, out int hang, out int cot))
+            {
+                if (!ghe[hang, cot])
+                {
+                    ghe[hang, cot] = true;
+                    ve.GheDaDat.Add((hang, cot));
+                    Console.WriteLine($"Da dat ghe {nhap} vao ve {ve.ID}!");
+                    break;
+                }
+                else
+                {
+                    Console.WriteLine($"Ghe {nhap} da duoc dat! Moi nhap ghe khac.");
+                }
             }
             else
             {
-                Console.WriteLine($"Ghe {nhap} da duoc dat!");
+                Console.WriteLine("Nhap sai dinh dang ghe! Moi nhap lai.");
             }
-        }
-        else
-        {
-            Console.WriteLine("Nhap sai dinh dang ghe!");
         }
         Console.WriteLine("\nNhan Enter de tiep tuc...");
         Console.ReadLine();
@@ -235,55 +239,58 @@ class Program
             return;
         }
 
-        Console.Write("Nhap ma ve phim: ");
-        if (!int.TryParse(Console.ReadLine(), out int maVe))
+        VePhim ve;
+        while (true)
         {
-            Console.WriteLine("Ma ve khong hop le!");
-            Console.ReadLine();
-            return;
-        }
-
-        var ve = danhSachVe.Find(v => v.ID == maVe);
-        if (ve == null)
-        {
-            Console.WriteLine("Khong tim thay ve phim!");
-            Console.ReadLine();
-            return;
+            Console.Write("Nhap ma ve phim: ");
+            if (int.TryParse(Console.ReadLine(), out int maVe))
+            {
+                ve = danhSachVe.Find(v => v.ID == maVe);
+                if (ve != null)
+                    break;
+            }
+            Console.WriteLine("Ma ve khong hop le! Moi nhap lai.");
         }
 
         if (ve.GheDaDat.Count == 0)
         {
-            Console.WriteLine($"Ve {maVe} chua dat ghe nao.");
+            Console.WriteLine($"Ve {ve.ID} chua dat ghe nao.");
             Console.ReadLine();
             return;
         }
 
-        Console.WriteLine($"Cac ghe da dat trong ve {maVe}:");
+        Console.WriteLine($"Cac ghe da dat trong ve {ve.ID}:");
         foreach (var g in ve.GheDaDat)
         {
             char hang = (char)('A' + g.hang);
             Console.Write($"{hang}{g.cot + 1:D2} ");
         }
-        Console.Write("\nNhap ghe muon huy (VD: A1): ");
-        string nhap = Console.ReadLine().ToUpper();
-        if (KiemTraNhapGhe(nhap, out int hangHuy, out int cotHuy))
+
+        while (true)
         {
-            var gheTrongVe = ve.GheDaDat.Find(g => g.hang == hangHuy && g.cot == cotHuy);
-            if (gheTrongVe != default)
+            Console.Write("\nNhap ghe muon huy (VD: A1): ");
+            string nhap = Console.ReadLine().ToUpper();
+            if (KiemTraNhapGhe(nhap, out int hangHuy, out int cotHuy))
             {
-                ghe[hangHuy, cotHuy] = false;
-                ve.GheDaDat.Remove(gheTrongVe);
-                Console.WriteLine($"Da huy ghe {nhap} trong ve {maVe}!");
+                var gheTrongVe = ve.GheDaDat.Find(g => g.hang == hangHuy && g.cot == cotHuy);
+                if (gheTrongVe != default)
+                {
+                    ghe[hangHuy, cotHuy] = false;
+                    ve.GheDaDat.Remove(gheTrongVe);
+                    Console.WriteLine($"Da huy ghe {nhap} trong ve {ve.ID}!");
+                    break;
+                }
+                else
+                {
+                    Console.WriteLine($"Ghe {nhap} khong thuoc ve {ve.ID}. Moi nhap lai.");
+                }
             }
             else
             {
-                Console.WriteLine($"Ghe {nhap} khong thuoc ve {maVe}!");
+                Console.WriteLine("Nhap sai dinh dang ghe! Moi nhap lai.");
             }
         }
-        else
-        {
-            Console.WriteLine("Nhap sai dinh dang ghe!");
-        }
+
         Console.WriteLine("\nNhan Enter de tiep tuc...");
         Console.ReadLine();
     }
