@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 
 class VePhim
 {
@@ -20,19 +21,20 @@ class Program
 
     static void Main()
     {
+        Console.OutputEncoding = System.Text.Encoding.UTF8; // Hỗ trợ hiển thị tiếng Việt
+
         DocTrangThai();
         while (true)
         {
             Console.Clear();
             Console.WriteLine("===== QUAN LY VE PHIM =====");
             Console.WriteLine("1. Xem so do ghe");
-            Console.WriteLine("2. Tao ve phim moi");
+            Console.WriteLine("2. Tao ve phim moi (dat ghe ngay)");
             Console.WriteLine("3. Xem danh sach ve phim");
-            Console.WriteLine("4. Dat ghe vao ve phim");
-            Console.WriteLine("5. Huy ghe trong ve phim");
-            Console.WriteLine("6. Luu va Thoat");
+            Console.WriteLine("4. Huy ghe trong ve phim");
+            Console.WriteLine("5. Luu va Thoat");
             Console.WriteLine("===========================");
-            Console.Write("Chon chuc nang (1-6): ");
+            Console.Write("Chon chuc nang (1-5): ");
             string chon = Console.ReadLine();
 
             switch (chon)
@@ -50,12 +52,9 @@ class Program
                     XemDanhSachVe();
                     break;
                 case "4":
-                    DatGhe();
-                    break;
-                case "5":
                     HuyGhe();
                     break;
-                case "6":
+                case "5":
                     LuuTrangThai();
                     Console.WriteLine("Da luu. Thoat chuong trinh...");
                     return;
@@ -141,7 +140,9 @@ class Program
         }
 
         danhSachVe.Add(ve);
-        Console.WriteLine($"\nDa tao ve phim co ma: {ve.ID}");
+        LuuTrangThai();
+
+        Console.WriteLine($"\nDa tao ve phim co ma: {ve.ID} va da duoc luu vao he thong.");
         Console.WriteLine("Nhan Enter de tiep tuc...");
         Console.ReadLine();
     }
@@ -178,208 +179,149 @@ class Program
         Console.ReadLine();
     }
 
-    static void DatGhe()
-    {
-        Console.Clear();
-        if (danhSachVe.Count == 0)
-        {
-            Console.WriteLine("Chua co ve phim nao! Hay tao ve truoc.");
-            Console.ReadLine();
-            return;
-        }
-
-        HienThiGhe();
-        VePhim ve;
-        while (true)
-        {
-            Console.Write("\nNhap ma ve phim: ");
-            if (int.TryParse(Console.ReadLine(), out int maVe))
-            {
-                ve = danhSachVe.Find(v => v.ID == maVe);
-                if (ve != null)
-                    break;
-            }
-            Console.WriteLine("Ma ve khong hop le! Moi nhap lai.");
-        }
-
-        while (true)
-        {
-            Console.Write("Nhap ma ghe muon dat (VD: A1): ");
-            string nhap = Console.ReadLine().ToUpper();
-            if (KiemTraNhapGhe(nhap, out int hang, out int cot))
-            {
-                if (!ghe[hang, cot])
-                {
-                    ghe[hang, cot] = true;
-                    ve.GheDaDat.Add((hang, cot));
-                    Console.WriteLine($"Da dat ghe {nhap} vao ve {ve.ID}!");
-                    break;
-                }
-                else
-                {
-                    Console.WriteLine($"Ghe {nhap} da duoc dat! Moi nhap ghe khac.");
-                }
-            }
-            else
-            {
-                Console.WriteLine("Nhap sai dinh dang ghe! Moi nhap lai.");
-            }
-        }
-        Console.WriteLine("\nNhan Enter de tiep tuc...");
-        Console.ReadLine();
-    }
-
     static void HuyGhe()
     {
         Console.Clear();
-        if (danhSachVe.Count == 0)
+        Console.Write("Nhap ma ve phim de huy ghe: ");
+        if (int.TryParse(Console.ReadLine(), out int id))
         {
-            Console.WriteLine("Chua co ve phim nao!");
-            Console.ReadLine();
-            return;
-        }
-
-        VePhim ve;
-        while (true)
-        {
-            Console.Write("Nhap ma ve phim: ");
-            if (int.TryParse(Console.ReadLine(), out int maVe))
+            var ve = danhSachVe.Find(v => v.ID == id);
+            if (ve != null && ve.GheDaDat.Count > 0)
             {
-                ve = danhSachVe.Find(v => v.ID == maVe);
-                if (ve != null)
-                    break;
-            }
-            Console.WriteLine("Ma ve khong hop le! Moi nhap lai.");
-        }
-
-        if (ve.GheDaDat.Count == 0)
-        {
-            Console.WriteLine($"Ve {ve.ID} chua dat ghe nao.");
-            Console.ReadLine();
-            return;
-        }
-
-        Console.WriteLine($"Cac ghe da dat trong ve {ve.ID}:");
-        foreach (var g in ve.GheDaDat)
-        {
-            char hang = (char)('A' + g.hang);
-            Console.Write($"{hang}{g.cot + 1:D2} ");
-        }
-
-        while (true)
-        {
-            Console.Write("\nNhap ghe muon huy (VD: A1): ");
-            string nhap = Console.ReadLine().ToUpper();
-            if (KiemTraNhapGhe(nhap, out int hangHuy, out int cotHuy))
-            {
-                var gheTrongVe = ve.GheDaDat.Find(g => g.hang == hangHuy && g.cot == cotHuy);
-                if (gheTrongVe != default)
+                Console.WriteLine($"Danh sach ghe trong ve {id}:");
+                foreach (var g in ve.GheDaDat)
                 {
-                    ghe[hangHuy, cotHuy] = false;
-                    ve.GheDaDat.Remove(gheTrongVe);
-                    Console.WriteLine($"Da huy ghe {nhap} trong ve {ve.ID}!");
-                    break;
+                    char hanghuy = (char)('A' + g.hang);
+                    Console.Write($"{hanghuy}{g.cot + 1:D2} ");
+                }
+                Console.Write("\nNhap ma ghe can huy: ");
+                string nhap = Console.ReadLine().ToUpper();
+                if (KiemTraNhapGhe(nhap, out int hang, out int cot) && ve.GheDaDat.Remove((hang, cot)))
+                {
+                    ghe[hang, cot] = false;
+                    LuuTrangThai();
+                    Console.WriteLine($"Da huy ghe {nhap} trong ve {id}.");
                 }
                 else
                 {
-                    Console.WriteLine($"Ghe {nhap} khong thuoc ve {ve.ID}. Moi nhap lai.");
+                    Console.WriteLine("Ghe khong hop le hoac khong thuoc ve nay.");
                 }
             }
             else
             {
-                Console.WriteLine("Nhap sai dinh dang ghe! Moi nhap lai.");
+                Console.WriteLine("Ve phim khong ton tai hoac khong co ghe nao de huy.");
             }
         }
-
         Console.WriteLine("\nNhan Enter de tiep tuc...");
         Console.ReadLine();
-    }
-
-    static bool KiemTraNhapGhe(string nhap, out int hang, out int cot)
-    {
-        hang = -1; cot = -1;
-        if (string.IsNullOrEmpty(nhap) || nhap.Length < 2)
-            return false;
-        char h = nhap[0];
-        if (h < 'A' || h >= 'A' + soHang)
-            return false;
-        string so = nhap.Substring(1);
-        if (!int.TryParse(so, out int c))
-            return false;
-        if (c < 1 || c > soCot)
-            return false;
-        hang = h - 'A';
-        cot = c - 1;
-        return true;
     }
 
     static void LuuTrangThai()
     {
-        using (StreamWriter sw = new StreamWriter(fileGhe))
+        try
         {
-            for (int i = 0; i < soHang; i++)
+            // Lưu trạng thái ghế
+            using (StreamWriter sw = new StreamWriter(fileGhe))
             {
-                for (int j = 0; j < soCot; j++)
+                for (int i = 0; i < soHang; i++)
                 {
-                    sw.Write(ghe[i, j] ? "1" : "0");
+                    for (int j = 0; j < soCot; j++)
+                    {
+                        sw.Write(ghe[i, j] ? '1' : '0');
+                    }
+                    sw.WriteLine();
                 }
-                sw.WriteLine();
+            }
+
+            // Lưu danh sách vé phim
+            using (StreamWriter sw = new StreamWriter(fileVe))
+            {
+                foreach (var ve in danhSachVe)
+                {
+                    string gheDaDat = string.Join(";", ve.GheDaDat.Select(g => $"{g.hang},{g.cot}"));
+                    sw.WriteLine($"{ve.ID}:{gheDaDat}");
+                }
             }
         }
-
-        using (StreamWriter sw = new StreamWriter(fileVe))
+        catch (IOException ex)
         {
-            foreach (var ve in danhSachVe)
-            {
-                sw.Write($"{ve.ID}:");
-                foreach (var g in ve.GheDaDat)
-                {
-                    sw.Write($"{g.hang},{g.cot};");
-                }
-                sw.WriteLine();
-            }
+            Console.WriteLine($"Loi khi luu trang thai: {ex.Message}");
         }
     }
 
     static void DocTrangThai()
     {
-        if (File.Exists(fileGhe))
+        try
         {
-            string[] lines = File.ReadAllLines(fileGhe);
-            for (int i = 0; i < Math.Min(soHang, lines.Length); i++)
+            // Đọc trạng thái ghế từ file
+            if (File.Exists(fileGhe))
             {
-                for (int j = 0; j < Math.Min(soCot, lines[i].Length); j++)
+                string[] lines = File.ReadAllLines(fileGhe);
+                for (int i = 0; i < soHang; i++)
                 {
-                    ghe[i, j] = lines[i][j] == '1';
-                }
-            }
-        }
-
-        if (File.Exists(fileVe))
-        {
-            string[] lines = File.ReadAllLines(fileVe);
-            foreach (var line in lines)
-            {
-                var parts = line.Split(':');
-                if (int.TryParse(parts[0], out int id))
-                {
-                    VePhim ve = new VePhim();
-                    ve.ID = id;
-                    if (parts.Length > 1)
+                    for (int j = 0; j < soCot; j++)
                     {
-                        var gheStrs = parts[1].Split(';', StringSplitOptions.RemoveEmptyEntries);
-                        foreach (var gStr in gheStrs)
-                        {
-                            var pos = gStr.Split(',');
-                            int h = int.Parse(pos[0]);
-                            int c = int.Parse(pos[1]);
-                            ve.GheDaDat.Add((h, c));
-                        }
+                        ghe[i, j] = lines[i][j] == '1';
                     }
-                    danhSachVe.Add(ve);
-                    idVeTiepTheo = Math.Max(idVeTiepTheo, id + 1);
+                }
+            }
+
+            // Đọc danh sách vé phim từ file
+            if (File.Exists(fileVe))
+            {
+                string[] lines = File.ReadAllLines(fileVe);
+                danhSachVe.Clear();
+                foreach (string line in lines)
+                {
+                    string[] parts = line.Split(':');
+                    if (parts.Length == 2)
+                    {
+                        VePhim ve = new VePhim { ID = int.Parse(parts[0]) };
+                        string[] gheParts = parts[1].Split(';', StringSplitOptions.RemoveEmptyEntries);
+                        foreach (string g in gheParts)
+                        {
+                            string[] pos = g.Split(',');
+                            if (pos.Length == 2)
+                            {
+                                int hang = int.Parse(pos[0]);
+                                int cot = int.Parse(pos[1]);
+                                ve.GheDaDat.Add((hang, cot));
+                            }
+                        }
+                        danhSachVe.Add(ve);
+                    }
+                }
+
+                // Cập nhật ID vé tiếp theo
+                if (danhSachVe.Count > 0)
+                {
+                    idVeTiepTheo = danhSachVe[^1].ID + 1;
                 }
             }
         }
+        catch (IOException ex)
+        {
+            Console.WriteLine($"Loi khi doc trang thai: {ex.Message}");
+        }
+    }
+
+    static bool KiemTraNhapGhe(string maGhe, out int hang, out int cot)
+    {
+        hang = -1;
+        cot = -1;
+
+        if (maGhe.Length < 2 || maGhe.Length > 3) return false; // VD: A1, A12 (độ dài hợp lệ)
+
+        char kyTuHang = maGhe[0];  // Lấy ký tự đầu tiên làm hàng
+        if (kyTuHang < 'A' || kyTuHang >= 'A' + soHang) return false;
+
+        if (!int.TryParse(maGhe.Substring(1), out cot)) return false;
+        if (cot < 1 || cot > soCot) return false;
+
+        // Chuyển hàng về dạng số (A -> 0, B -> 1, ...)
+        hang = kyTuHang - 'A';
+        cot -= 1; // Chuyển số cột về index mảng (bắt đầu từ 0)
+
+        return true;
     }
 }
