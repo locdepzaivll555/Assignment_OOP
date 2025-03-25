@@ -7,6 +7,7 @@ class VePhim
 {
     public int ID { get; set; }
     public List<(int hang, int cot)> GheDaDat { get; set; } = new List<(int, int)>();
+    public int TongTien => GheDaDat.Count * 50000; // 50k mỗi ghế
 }
 
 class Program
@@ -21,9 +22,9 @@ class Program
 
     static void Main()
     {
-        Console.OutputEncoding = System.Text.Encoding.UTF8; // Hỗ trợ hiển thị tiếng Việt
-
+        Console.OutputEncoding = System.Text.Encoding.UTF8; // Hỗ trợ tiếng Việt
         DocTrangThai();
+
         while (true)
         {
             Console.Clear();
@@ -31,10 +32,11 @@ class Program
             Console.WriteLine("1. Xem so do ghe");
             Console.WriteLine("2. Tao ve phim moi (dat ghe ngay)");
             Console.WriteLine("3. Xem danh sach ve phim");
-            Console.WriteLine("4. Huy ghe trong ve phim");
-            Console.WriteLine("5. Luu va Thoat");
+            Console.WriteLine("4. Xem hoa don ve phim");
+            Console.WriteLine("5. Huy ghe trong ve phim");
+            Console.WriteLine("6. Thoat chuong trinh");
             Console.WriteLine("===========================");
-            Console.Write("Chon chuc nang (1-5): ");
+            Console.Write("Chon chuc nang (1-6): ");
             string chon = Console.ReadLine();
 
             switch (chon)
@@ -52,11 +54,13 @@ class Program
                     XemDanhSachVe();
                     break;
                 case "4":
-                    HuyGhe();
+                    XuatHoaDon();
                     break;
                 case "5":
-                    LuuTrangThai();
-                    Console.WriteLine("Da luu. Thoat chuong trinh...");
+                    HuyGhe();
+                    break;
+                case "6":
+                    Console.WriteLine("Thoat chuong trinh...");
                     return;
                 default:
                     Console.WriteLine("Lua chon khong hop le! Nhan Enter de thu lai...");
@@ -65,6 +69,8 @@ class Program
             }
         }
     }
+
+
 
     static void HienThiGhe()
     {
@@ -142,7 +148,7 @@ class Program
         danhSachVe.Add(ve);
         LuuTrangThai();
 
-        Console.WriteLine($"\nDa tao ve phim co ma: {ve.ID} va da duoc luu vao he thong.");
+        Console.WriteLine($"\nDa tao ve phim co ma: {ve.ID}. Tong tien: {ve.TongTien:N0} VND");
         Console.WriteLine("Nhan Enter de tiep tuc...");
         Console.ReadLine();
     }
@@ -159,25 +165,43 @@ class Program
             Console.WriteLine("Danh sach ve phim:");
             foreach (var ve in danhSachVe)
             {
-                Console.Write($"- Ve {ve.ID}: ");
-                if (ve.GheDaDat.Count == 0)
+                Console.Write($"- Ve {ve.ID} ({ve.TongTien:N0} VND): ");
+                foreach (var g in ve.GheDaDat)
                 {
-                    Console.WriteLine("Chua dat ghe");
+                    char hang = (char)('A' + g.hang);
+                    Console.Write($"{hang}{g.cot + 1:D2} ");
                 }
-                else
-                {
-                    foreach (var g in ve.GheDaDat)
-                    {
-                        char hang = (char)('A' + g.hang);
-                        Console.Write($"{hang}{g.cot + 1:D2} ");
-                    }
-                    Console.WriteLine();
-                }
+                Console.WriteLine();
             }
         }
         Console.WriteLine("\nNhan Enter de quay lai menu...");
         Console.ReadLine();
     }
+
+    static void XuatHoaDon()
+    {
+        Console.Clear();
+        Console.Write("Nhap ma ve phim de xem hoa don: ");
+        if (int.TryParse(Console.ReadLine(), out int id))
+        {
+            var ve = danhSachVe.Find(v => v.ID == id);
+            if (ve != null)
+            {
+                Console.WriteLine("\n===== HOA DON VE PHIM =====");
+                Console.WriteLine($"Ma ve: {ve.ID}");
+                Console.WriteLine("Ghe da dat: " + string.Join(", ", ve.GheDaDat.Select(g => $"{(char)('A' + g.hang)}{g.cot + 1:D2}")));
+                Console.WriteLine($"Tong tien: {ve.TongTien:N0} VND");
+                Console.WriteLine("===========================");
+            }
+            else
+            {
+                Console.WriteLine("Khong tim thay ve phim.");
+            }
+        }
+        Console.WriteLine("\nNhan Enter de quay lai menu...");
+        Console.ReadLine();
+    }
+  
 
     static void HuyGhe()
     {
