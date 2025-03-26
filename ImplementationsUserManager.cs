@@ -160,6 +160,45 @@ namespace CinemaManagement.Implementations
             return null; // Không tìm thấy
         }
 
+        public bool VerifyPassword(string username, string password)
+        {
+            if (!File.Exists(FilePath)) return false;
+
+            string[] accounts = File.ReadAllLines(FilePath);
+            return accounts.Any(account =>
+            {
+                string[] data = account.Split('|');
+                return data.Length >= 4 && data[0] == username && data[1] == password;
+            });
+        }
+
+        public void UpdatePassword(string username, string newPassword)
+        {
+            if (!File.Exists(FilePath)) return;
+
+            var lines = File.ReadAllLines(FilePath).ToList();
+            for (int i = 0; i < lines.Count; i++)
+            {
+                string[] data = lines[i].Split('|');
+                if (data.Length >= 4 && data[0] == username)
+                {
+                    data[1] = newPassword;
+                    lines[i] = string.Join("|", data);
+                    break;
+                }
+            }
+            File.WriteAllLines(FilePath, lines);
+        }
+
+        public void DeleteAccount(string username)
+        {
+            if (!File.Exists(FilePath)) return;
+
+            var lines = File.ReadAllLines(FilePath).Where(line => !line.StartsWith(username + "|")).ToList();
+            File.WriteAllLines(FilePath, lines);
+        }
+
+
         private bool IsValidPhoneNumber(string phone)
         {
             return phone.Length == 10 && phone.StartsWith("0") && phone.All(char.IsDigit);

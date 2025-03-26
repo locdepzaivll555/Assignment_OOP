@@ -1,4 +1,7 @@
-﻿namespace CinemaManagement.Entities
+﻿using System;
+using System.Collections.Generic;
+
+namespace CinemaManagement.Entities
 {
     public class Movie
     {
@@ -8,10 +11,12 @@
         public string Subtitle { get; set; }    // Phụ đề (VD: "Tiếng Việt", "Tiếng Anh")
         public int Duration { get; set; }       // Thời lượng (phút)
         public DateTime ReleaseDate { get; set; } // Ngày phát hành
-        public DateTime ShowTime { get; set; }  // Ngày giờ chiếu phim
+        public Dictionary<DateTime, List<(DateTime Start, DateTime End)>> Showtimes { get; set; } // Lưu suất chiếu theo ngày
         public string Status { get; set; }      // Trạng thái ("Đang chiếu", "Sắp chiếu", "Ngừng chiếu")
 
-        public Movie(string title, string director, string genre, string subtitle, int duration, DateTime releaseDate, DateTime showTime, string status)
+        // Constructor mới
+        public Movie(string title, string director, string genre, string subtitle, int duration,
+                     DateTime releaseDate, Dictionary<DateTime, List<(DateTime Start, DateTime End)>> showtimes, string status)
         {
             Title = title;
             Director = director;
@@ -19,15 +24,22 @@
             Subtitle = subtitle;
             Duration = duration;
             ReleaseDate = releaseDate;
-            ShowTime = showTime;
+            Showtimes = showtimes ?? new Dictionary<DateTime, List<(DateTime, DateTime)>>();
             Status = status;
         }
 
         public override string ToString()
         {
+            string showtimeStr = Showtimes.Count > 0
+                ? string.Join("\n", Showtimes.Select(day =>
+                    $"📅 {day.Key:dd/MM/yyyy}: " + string.Join(", ", day.Value.Select(s => $"{s.Start:HH:mm} - {s.End:HH:mm}"))))
+                : "Chưa có suất chiếu";
+
             return $"🎬 {Title} | Đạo diễn: {Director} | Thể loại: {Genre} | Phụ đề: {Subtitle} | " +
-                   $"Thời lượng: {Duration} phút | Phát hành: {ReleaseDate:dd/MM/yyyy} | Chiếu lúc: {ShowTime:HH:mm dd/MM/yyyy} | " +
-                   $"Trạng thái: {Status}";
+                   $"Thời lượng: {Duration} phút | Phát hành: {ReleaseDate:dd/MM/yyyy} | " +
+                   $"Trạng thái: {Status}\nSuất chiếu:\n{showtimeStr}";
         }
     }
 }
+
+
