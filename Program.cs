@@ -477,16 +477,23 @@ namespace CinemaManagement
 
                                     while (true)
                                     {
-                                        Console.WriteLine("\n📌 Thông tin phim:");
-                                        Console.WriteLine($"1. Tiêu đề: {movie.Title}");
-                                        Console.WriteLine($"2. Đạo diễn: {movie.Director}");
-                                        Console.WriteLine($"3. Thể loại: {movie.Genre}");
-                                        Console.WriteLine($"4. Phụ đề: {movie.Subtitle}");
-                                        Console.WriteLine($"5. Thời lượng: {movie.Duration} phút");
-                                        Console.WriteLine($"6. Ngày phát hành: {movie.ReleaseDate:yyyy-MM-dd}");
-                                        Console.WriteLine($"7. Thời gian suất chiếu: {string.Join(", ", movie.Showtimes.SelectMany(kvp => kvp.Value.Select(t => $"{t.Start:HH:mm} - {t.End:HH:mm}")))}");
+                                        Console.WriteLine("\n🔍 Thông tin phim hiện tại:");
+                                        Console.WriteLine($"🎬 Tiêu đề: {movie.Title}");
+                                        Console.WriteLine($"🎬 Đạo diễn: {movie.Director}");
+                                        Console.WriteLine($"🎬 Thể loại: {movie.Genre}");
+                                        Console.WriteLine($"🎬 Phụ đề: {movie.Subtitle}");
+                                        Console.WriteLine($"🎬 Thời lượng: {movie.Duration} phút");
+                                        Console.WriteLine($"🎬 Ngày phát hành: {movie.ReleaseDate.ToString("dddd, dd/MM/yyyy", new System.Globalization.CultureInfo("vi-VN"))}");
+                                        Console.WriteLine($"🎬 Suất chiếu hiện tại:");
 
-                                        Console.WriteLine($"8. Trạng thái: {movie.Status}");
+                                        foreach (var date in movie.Showtimes.Keys)
+                                        {
+                                            string showtimeDate = date.ToString("dddd, dd/MM/yyyy", new System.Globalization.CultureInfo("vi-VN"));
+                                            string showtimesStr = string.Join(", ", movie.Showtimes[date].Select(s => $"{s.Start:HH:mm}-{s.End:HH:mm}"));
+                                            Console.WriteLine($"   📅 {showtimeDate}: {showtimesStr}");
+                                        }
+
+                                        Console.WriteLine($"🎬 Trạng thái: {movie.Status}");
                                         Console.WriteLine("0. Trở về");
 
                                         Console.Write("Vui lòng nhập phần muốn sửa: ");
@@ -907,15 +914,23 @@ namespace CinemaManagement
                                         Console.WriteLine("⚠ Không tìm thấy phim!");
                                         return;
                                     }
+                                    Console.WriteLine("\n🔍 Thông tin phim hiện tại:");
+                                    Console.WriteLine($"🎬 Tiêu đề: {movie.Title}");
+                                    Console.WriteLine($"🎬 Đạo diễn: {movie.Director}");
+                                    Console.WriteLine($"🎬 Thể loại: {movie.Genre}");
+                                    Console.WriteLine($"🎬 Phụ đề: {movie.Subtitle}");
+                                    Console.WriteLine($"🎬 Thời lượng: {movie.Duration} phút");
+                                    Console.WriteLine($"🎬 Ngày phát hành: {movie.ReleaseDate.ToString("dddd, dd/MM/yyyy", new System.Globalization.CultureInfo("vi-VN"))}");
+                                    Console.WriteLine($"🎬 Suất chiếu hiện tại:");
 
-                                    Console.WriteLine("\n📌 Thông tin phim:");
-                                    Console.WriteLine($"1. Tiêu đề: {movie.Title}");
-                                    Console.WriteLine($"2. Đạo diễn: {movie.Director}");
-                                    Console.WriteLine($"3. Thể loại: {movie.Genre}");
-                                    Console.WriteLine($"4. Phụ đề: {movie.Subtitle}");
-                                    Console.WriteLine($"5. Thời lượng: {movie.Duration} phút");
-                                    Console.WriteLine($"6. Ngày phát hành: {movie.ReleaseDate:yyyy-MM-dd}");
-                                    Console.WriteLine($"7. Trạng thái: {movie.Status}");
+                                    foreach (var date in movie.Showtimes.Keys)
+                                    {
+                                        string showtimeDate = date.ToString("dddd, dd/MM/yyyy", new System.Globalization.CultureInfo("vi-VN"));
+                                        string showtimesStr = string.Join(", ", movie.Showtimes[date].Select(s => $"{s.Start:HH:mm}-{s.End:HH:mm}"));
+                                        Console.WriteLine($"   📅 {showtimeDate}: {showtimesStr}");
+                                    }
+
+                                    Console.WriteLine($"🎬 Trạng thái: {movie.Status}");
 
                                     // Hỏi người dùng có muốn đặt vé không
                                     Console.Write($"Bạn có muốn đặt vé xem phim {movie.Title} không? (y/n): ");
